@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Contact Form</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-header h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .form-control.error {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.05);
+        }
+
+        .form-control.success {
+            border-color: #27ae60;
+            background: rgba(39, 174, 96, 0.05);
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .error-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .success-message {
+            color: #27ae60;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .success-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn.loading {
+            pointer-events: none;
+        }
+
+        .submit-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e1e5e9;
+            border-radius: 2px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .floating-label {
+            position: relative;
+        }
+
+        .floating-label input,
+        .floating-label textarea {
+            padding-top: 25px;
+        }
+
+        .floating-label label {
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            color: #999;
+            font-weight: normal;
+            text-transform: none;
+            letter-spacing: normal;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .floating-label input:focus + label,
+        .floating-label input:not(:placeholder-shown) + label,
+        .floating-label textarea:focus + label,
+        .floating-label textarea:not(:placeholder-shown) + label {
+            top: 5px;
+            font-size: 0.7rem;
+            color: #667eea;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .success-animation {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #27ae60;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            animation: bounceIn 0.6s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .character-counter {
+            text-align: right;
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 480px) {
+            .form-container {
+                margin: 10px;
+                padding: 20px;
+                border-radius: 15px;
+            }
+
+            .form-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .form-control {
+                padding: 12px;
+            }
+
+            .submit-btn {
+                padding: 12px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="form-header">
+            <h1>Get In Touch</h1>
+            <p>We'd love to hear from you. Send us a message!</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <form id="contactForm">
+            <div class="form-group floating-label">
+                <input type="text" id="name" class="form-control" placeholder=" " required>
+                <label for="name">Full Name</label>
+                <div class="error-message" id="nameError"></div>
+                <div class="success-message" id="nameSuccess"></div>
+            </div>
+
+            <div class="form-group floating-label">
+                <input type="email" id="email" class="form-control" placeholder=" " required>
+                <label for="email">Email Address</label>
+                <div class="error-message" id="emailError"></div>
+                <div class="success-message" id="emailSuccess"></div>
+            </div>
+
+            <div class="form-group floating-label">
+                <input type="tel" id="phone" class="form-control" placeholder=" ">
+                <label for="phone">Phone Number</label>
+                <div class="error-message" id="phoneError"></div>
+                <div class="success-message" id="phoneSuccess"></div>
+            </div>
+
+            <div class="form-group floating-label">
+                <textarea id="message" class="form-control" placeholder=" " required maxlength="500"></textarea>
+                <label for="message">Your Message</label>
+                <div class="character-counter"><span id="charCount">0</span>/500</div>
+                <div class="error-message" id="messageError"></div>
+                <div class="success-message" id="messageSuccess"></div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Send Message
+            </button>
+        </form>
+
+        <div class="success-animation" id="successAnimation">
+            <div class="success-icon">✓</div>
+            <h2>Thank You!</h2>
+            <p>Your message has been sent successfully. We'll get back to you soon!</p>
+        </div>
+    </div>
+
+    <script
